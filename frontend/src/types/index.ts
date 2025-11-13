@@ -156,3 +156,19 @@ export interface SalesAnalytics {
 export interface ApiError {
   detail: string;
 }
+
+
+// Cart Types (ADD these if not already there)
+export interface CartItem {
+  id: string;
+  product_id: string;
+  quantity: number;
+  product: Product;
+  created_at: string;
+}
+
+export interface Cart {
+  items: CartItem[];
+  total_items: number;
+  total_price: number;
+}

@@ -1,8 +1,14 @@
-// frontend/src/store/authStore.ts
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User } from '@/types';
+
+interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  phone?: string;
+  is_admin: boolean;
+  created_at: string;
+}
 
 interface AuthState {
   user: User | null;
@@ -39,11 +45,6 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({
-        user: state.user,
-        token: state.token,
-        isAuthenticated: state.isAuthenticated,
-      }),
     }
   )
 );

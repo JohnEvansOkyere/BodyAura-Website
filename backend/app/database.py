@@ -5,47 +5,35 @@ from app.config import settings
 import logging
 
 # Configure logging
+from supabase import create_client, Client, ClientOptions
+from app.config import settings
+import logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class Database:
-    """
-    Database wrapper for Supabase client.
-    Provides a singleton instance of the Supabase client.
-    """
-    
+    """Database wrapper for Supabase client (Singleton pattern)."""
     _client: Client = None
-    
+
     @classmethod
     def get_client(cls) -> Client:
-        """
-        Get or create Supabase client instance.
-        
-        Returns:
-            Client: Supabase client instance
-        """
         if cls._client is None:
             try:
+                options = ClientOptions()  # Optional: customize if needed
                 cls._client = create_client(
                     settings.SUPABASE_URL,
-                    settings.SUPABASE_KEY
+                    settings.SUPABASE_KEY,
+                    options=options
                 )
-                logger.info("Supabase client initialized successfully")
+                logger.info("Supabase client initialized successfully.")
             except Exception as e:
-                logger.error(f"Failed to initialize Supabase client: {str(e)}")
+                logger.error(f"Failed to initialize Supabase client: {e}")
                 raise
-        
         return cls._client
 
 
-# Export a function to get the database client
 def get_db() -> Client:
-    """
-    Dependency function to get database client.
-    Can be used with FastAPI's Depends() for route injection.
-    
-    Returns:
-        Client: Supabase client instance
-    """
+    """Dependency function to get the database client."""
     return Database.get_client()

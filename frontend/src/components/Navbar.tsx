@@ -1,15 +1,34 @@
-// frontend/src/components/Navbar.tsx
+// frontend/src/components/Navbar.tsx - UPDATE
 
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, LogOut, Package, LayoutDashboard, Menu, X } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { useCartStore } from '../store/cartStore';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { cartService } from '../services/cartService';
 
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const { cartCount, setCartCount } = useCartStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  // Fetch cart to get count
+  const { data: cart } = useQuery({
+    queryKey: ['cart'],
+    queryFn: cartService.getCart,
+    enabled: isAuthenticated,
+    refetchOnWindowFocus: true,
+  });
+
+  // Update cart count when cart data changes
+  useEffect(() => {
+    if (cart) {
+      setCartCount(cart.total_items);
+    }
+  }, [cart, setCartCount]);
 
   const handleLogout = () => {
     logout();
@@ -35,12 +54,6 @@ export default function Navbar() {
             <Link to="/products" className="text-gray-700 hover:text-primary-600 transition">
               Products
             </Link>
-            <Link to="/about" className="text-gray-700 hover:text-primary-600 transition">
-              About
-            </Link>
-            <Link to="/contact" className="text-gray-700 hover:text-primary-600 transition">
-              Contact
-            </Link>
           </div>
 
           {/* Right Side Actions */}
@@ -52,9 +65,11 @@ export default function Navbar() {
                 className="relative p-2 text-gray-700 hover:text-primary-600 transition"
               >
                 <ShoppingCart className="w-6 h-6" />
-                <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  0
-                </span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                    {cartCount}
+                  </span>
+                )}
               </button>
             )}
 
@@ -159,20 +174,6 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             >
               Products
-            </Link>
-            <Link
-              to="/about"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              to="/contact"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contact
             </Link>
 
             {!isAuthenticated && (

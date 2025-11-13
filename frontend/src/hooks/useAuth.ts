@@ -1,17 +1,26 @@
 // frontend/src/hooks/useAuth.ts
-
-import { useAuthStore } from '@/store/authStore';
-import { authService } from '@/services/authService';
+import { useAuthStore } from '../store/authStore';
+import { authService } from '../services/authService';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { LoginCredentials, SignupData } from '@/types';
+
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+interface SignupData {
+  email: string;
+  password: string;
+  full_name: string;
+  phone?: string;
+}
 
 export const useAuth = () => {
   const { user, token, isAuthenticated, setAuth, logout: logoutStore } = useAuthStore();
   const navigate = useNavigate();
 
-  // Login mutation
   const loginMutation = useMutation({
     mutationFn: (credentials: LoginCredentials) => authService.login(credentials),
     onSuccess: (data) => {
@@ -24,7 +33,6 @@ export const useAuth = () => {
     },
   });
 
-  // Signup mutation
   const signupMutation = useMutation({
     mutationFn: (data: SignupData) => authService.signup(data),
     onSuccess: (data) => {
@@ -37,7 +45,6 @@ export const useAuth = () => {
     },
   });
 
-  // Logout function
   const logout = async () => {
     try {
       await authService.logout();
