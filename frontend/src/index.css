@@ -7,10 +7,6 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -92,12 +88,6 @@
   }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -116,7 +106,7 @@
   @apply bg-gray-500;
 }
 
-/* Loading spinner */
+/* Loading spinner animation */
 @keyframes spin {
   to {
     transform: rotate(360deg);
