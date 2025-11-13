@@ -1,5 +1,6 @@
 # backend/app/middleware/auth.py
 
+from typing import Optional  # ADD THIS LINE
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.utils.auth import decode_access_token
@@ -84,7 +85,7 @@ async def get_current_admin_user(
     return current_user
 
 
-def optional_current_user(
+async def optional_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False)),
     db: Client = Depends(get_db)
 ) -> Optional[UserResponse]:

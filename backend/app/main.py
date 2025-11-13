@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
+from app.routes import auth, products  # Import products routes
 import logging
 
 # Configure logging
@@ -51,10 +52,12 @@ async def health_check():
     }
 
 
-# Route imports will be added in the next phase
-# from app.routes import auth, products, cart, orders, payments, admin
-# app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-# app.include_router(products.router, prefix="/api/products", tags=["Products"])
+# Include routers
+app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(products.router, prefix="/api/products", tags=["Products"])
+
+# Future route imports (Phase 4+)
+# from app.routes import cart, orders, payments, admin
 # app.include_router(cart.router, prefix="/api/cart", tags=["Cart"])
 # app.include_router(orders.router, prefix="/api/orders", tags=["Orders"])
 # app.include_router(payments.router, prefix="/api/payments", tags=["Payments"])
