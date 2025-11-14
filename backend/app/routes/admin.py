@@ -1,138 +1,141 @@
 # backend/app/routes/admin.py
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from supabase import Client
+from fastapi import APIRouter, Depends, HTTPException, status
 from app.database import get_db
-from app.models.schemas import (
-    OrderResponse, UserResponse, SalesAnalytics, OrderStatus
-)
-from app.services.order_service import OrderService
-from app.middleware.auth import get_current_admin_user
-from typing import Optional
-from decimal import Decimal
+from app.routes.auth import get_current_user
+from typing import Dict, Any
 import logging
 
+router = APIRouter(prefix="/api/admin", tags=["admin"])
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+
+def require_admin(current_user = Depends(get_current_user)):
+    """Verify user is admin."""
+    # Access as attribute, not dict
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    return current_user
 
 
-@router.get("/orders", response_model=dict)
-async def get_all_orders(
-    skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(20, ge=1, le=100, description="Maximum number of records"),
-    status_filter: Optional[OrderStatus] = Query(None, description="Filter by order status"),
-    current_admin: UserResponse = Depends(get_current_admin_user),
-    db: Client = Depends(get_db)
-):
-    """
-    Get all orders (admin only).
-    
-    Args:
-        skip: Number of records to skip (pagination)
-        limit: Maximum number of records to return
-        status_filter: Optional status filter
-        current_admin: Current authenticated admin user
-        db: Database client
-        
-    Returns:
-        dict: Orders list with pagination info
-        
-    Raises:
-        HTTPException: If user is not admin
-    """
-    logger.info(f"Admin fetching all orders: {current_admin.email}")
-    
-    orders, total_count = await OrderService.get_all_orders(
-        db, skip, limit, status_filter
-    )
-    
-    return {
-        "orders": orders,
-        "total": total_count,
-        "skip": skip,
-        "limit": limit,
-        "has_more": (skip + limit) < total_count
-    }
-
-
-@router.get("/analytics", response_model=SalesAnalytics)
-async def get_sales_analytics(
-    current_admin: UserResponse = Depends(get_current_admin_user),
-    db: Client = Depends(get_db)
-):
-    """
-    Get sales analytics and statistics (admin only).
-    
-    Args:
-        current_admin: Current authenticated admin user
-        db: Database client
-        
-    Returns:
-        SalesAnalytics: Sales statistics
-        
-    Raises:
-        HTTPException: If user is not admin
-    """
-    logger.info(f"Admin fetching analytics: {current_admin.email}")
-    
+@router.get("/dashboard")
+async def get_dashboard_stats(
+    db=Depends(get_db),
+    current_user = Depends(require_admin)
+) -> Dict[str, Any]:
+    """Get dashboard statistics for admin."""
     try:
-        # Get total revenue from completed orders
-        completed_orders_response = db.table("orders").select(
-            "total_amount"
-        ).eq("payment_status", "completed").execute()
+        # Get total orders
+        orders_response = db.table("orders").select("*", count="exact").execute()
+        total_orders = orders_response.count if orders_response.count else 0
         
-        total_revenue = sum(
-            Decimal(str(order["total_amount"])) 
-            for order in completed_orders_response.data
-        )
+        # Get total revenue
+        revenue_response = db.table("orders").select("total_amount").execute()
+        total_revenue = sum(float(order.get("total_amount", 0)) for order in revenue_response.data)
         
-        # Get order counts by status
-        all_orders_response = db.table("orders").select("status").execute()
+        # Get pending orders
+        pending_response = db.table("orders").select("*", count="exact").eq("status", "pending").execute()
+        pending_orders = pending_response.count if pending_response.count else 0
         
-        total_orders = len(all_orders_response.data)
-        pending_orders = sum(1 for o in all_orders_response.data if o["status"] == "pending")
-        completed_orders = sum(
-            1 for o in all_orders_response.data 
-            if o["status"] == "delivered"
-        )
+        # Get total products
+        products_response = db.table("products").select("*", count="exact").eq("is_active", True).execute()
+        total_products = products_response.count if products_response.count else 0
         
-        # Get product statistics
-        products_response = db.table("products").select(
-            "id, stock_quantity"
-        ).eq("is_active", True).execute()
+        # Get low stock products (less than 10)
+        low_stock_response = db.table("products").select("*", count="exact").eq("is_active", True).lt("stock_quantity", 10).execute()
+        low_stock_products = low_stock_response.count if low_stock_response.count else 0
         
-        total_products = len(products_response.data)
-        low_stock_products = sum(
-            1 for p in products_response.data 
-            if p["stock_quantity"] < 10
-        )
-        
-        # Get recent orders
-        recent_orders_response = db.table("orders").select(
-            "*, order_items(*, products(*)), users(email, full_name)"
-        ).order("created_at", desc=True).limit(10).execute()
-        
-        recent_orders = []
-        for order_data in recent_orders_response.data:
-            order = await OrderService._format_order(order_data)
-            recent_orders.append(order)
-        
-        analytics = SalesAnalytics(
-            total_revenue=total_revenue,
-            total_orders=total_orders,
-            pending_orders=pending_orders,
-            completed_orders=completed_orders,
-            total_products=total_products,
-            low_stock_products=low_stock_products,
-            recent_orders=recent_orders
-        )
-        
-        return analytics
-        
+        return {
+            "total_orders": total_orders,
+            "total_revenue": total_revenue,
+            "pending_orders": pending_orders,
+            "total_products": total_products,
+            "low_stock_products": low_stock_products,
+        }
+    
     except Exception as e:
-        logger.error(f"Error fetching analytics: {str(e)}")
+        logger.error(f"Error fetching dashboard stats: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch analytics"
+            detail="Failed to fetch dashboard statistics"
+        )
+
+
+@router.get("/orders")
+async def get_all_orders(
+    skip: int = 0,
+    limit: int = 50,
+    db=Depends(get_db),
+    current_user = Depends(require_admin)
+):
+    """Get all orders for admin."""
+    try:
+        # Get orders with count
+        response = db.table("orders").select(
+            "*",
+            count="exact"
+        ).order("created_at", desc=True).range(skip, skip + limit - 1).execute()
+        
+        total = response.count if response.count else 0
+        orders = response.data
+        
+        return {
+            "orders": orders,
+            "total": total,
+            "skip": skip,
+            "limit": limit,
+            "has_more": total > (skip + limit)
+        }
+    
+    except Exception as e:
+        logger.error(f"Error fetching orders: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch orders"
+        )
+
+
+@router.put("/orders/{order_id}")
+async def update_order_status(
+    order_id: str,
+    status: str = None,
+    payment_status: str = None,
+    db=Depends(get_db),
+    current_user = Depends(require_admin)
+):
+    """Update order status (admin only)."""
+    try:
+        update_data = {}
+        if status:
+            update_data["status"] = status
+        if payment_status:
+            update_data["payment_status"] = payment_status
+        
+        if not update_data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No update data provided"
+            )
+        
+        # Update order
+        response = db.table("orders").update(update_data).eq("id", order_id).execute()
+        
+        if not response.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Order not found"
+            )
+        
+        return response.data[0]
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating order: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update order"
         )

@@ -1,210 +1,218 @@
 # backend/app/routes/payments.py
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request, Header
-from supabase import Client
+from fastapi import APIRouter, Depends, HTTPException, status
 from app.database import get_db
-from app.models.schemas import (
-    PaymentInitialize, PaymentResponse, PaymentVerify,
-    SuccessResponse, UserResponse, PaymentStatus
-)
-from app.services.payment_service import PaymentService
-from app.services.order_service import OrderService
-from app.services.email_service import EmailService
-from app.services.user_service import UserService
-from app.middleware.auth import get_current_user
+from app.routes.auth import get_current_user
 from app.config import settings
+import httpx
 import logging
-import json
+from typing import Dict, Any
 
+router = APIRouter(prefix="/api/payments", tags=["payments"])
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
 
-
-@router.post("/initialize", response_model=PaymentResponse)
+@router.post("/initialize/{order_id}")
 async def initialize_payment(
-    payment_data: PaymentInitialize,
-    current_user: UserResponse = Depends(get_current_user),
-    db: Client = Depends(get_db)
+    order_id: str,
+    db=Depends(get_db),
+    current_user=Depends(get_current_user)
 ):
-    """
-    Initialize payment with Paystack.
-    
-    Args:
-        payment_data: Payment initialization data (order_id, payment_method)
-        current_user: Current authenticated user
-        db: Database client
+    """Initialize Paystack payment for an order."""
+    try:
+        # Get order
+        order_response = db.table("orders").select("*").eq("id", order_id).eq("user_id", current_user.id).execute()
         
-    Returns:
-        PaymentResponse: Payment authorization URL and reference
+        if not order_response.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Order not found"
+            )
         
-    Raises:
-        HTTPException: If order not found or initialization fails
-    """
-    logger.info(f"Initializing payment for order: {payment_data.order_id}, user: {current_user.email}")
+        order = order_response.data[0]
+        
+        # Check if already paid
+        if order.get("payment_status") == "completed":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Order already paid"
+            )
+        
+        # Generate unique reference
+        import uuid
+        reference = f"ORD-{order_id[:8]}-{uuid.uuid4().hex[:8]}".upper()
+        
+        # Convert amount to kobo/pesewas (multiply by 100)
+        amount = float(order.get("total_amount", 0))
+        amount_in_pesewas = int(amount * 100)
+        
+        # Initialize payment with Paystack
+        paystack_data = {
+            "email": current_user.email,
+            "amount": amount_in_pesewas,
+            "reference": reference,
+            "callback_url": f"{settings.FRONTEND_URL}/payment/verify/{reference}",
+            "metadata": {
+                "order_id": order_id,
+                "user_id": current_user.id,
+            }
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.paystack.co/transaction/initialize",
+                json=paystack_data,
+                headers={
+                    "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+                    "Content-Type": "application/json"
+                },
+                timeout=30.0
+            )
+        
+        if response.status_code != 200:
+            logger.error(f"Paystack initialization failed: {response.text}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to initialize payment"
+            )
+        
+        paystack_response = response.json()
+        
+        if not paystack_response.get("status"):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Payment initialization failed"
+            )
+        
+        # Update order with payment reference
+        db.table("orders").update({
+            "payment_reference": reference
+        }).eq("id", order_id).execute()
+        
+        return {
+            "authorization_url": paystack_response["data"]["authorization_url"],
+            "access_code": paystack_response["data"]["access_code"],
+            "reference": reference
+        }
     
-    # Get order and verify it belongs to user
-    order = await OrderService.get_order_by_id(db, payment_data.order_id, current_user.id)
-    
-    # Check if order is already paid
-    if order.payment_status == PaymentStatus.COMPLETED:
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Payment initialization error: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Order is already paid"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to initialize payment"
         )
-    
-    # Callback URL (frontend URL where user returns after payment)
-    callback_url = f"{settings.FRONTEND_URL}/orders/{payment_data.order_id}/payment-callback"
-    
-    # Initialize payment with Paystack
-    payment_response = await PaymentService.initialize_payment(
-        order_id=order.id,
-        email=current_user.email,
-        amount=float(order.total_amount),
-        payment_method=payment_data.payment_method,
-        callback_url=callback_url
-    )
-    
-    logger.info(f"Payment initialized successfully: {payment_response.reference}")
-    
-    return payment_response
 
 
-@router.post("/verify", response_model=dict)
+@router.get("/verify/{reference}")
 async def verify_payment(
-    payment_data: PaymentVerify,
-    current_user: UserResponse = Depends(get_current_user),
-    db: Client = Depends(get_db)
+    reference: str,
+    db=Depends(get_db),
+    current_user=Depends(get_current_user)
 ):
-    """
-    Verify payment with Paystack.
-    
-    Args:
-        payment_data: Payment verification data (reference)
-        current_user: Current authenticated user
-        db: Database client
+    """Verify payment status with Paystack."""
+    try:
+        # Verify with Paystack
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"https://api.paystack.co/transaction/verify/{reference}",
+                headers={
+                    "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+                },
+                timeout=30.0
+            )
         
-    Returns:
-        dict: Payment verification result
+        if response.status_code != 200:
+            logger.error(f"Paystack verification failed: {response.text}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Payment verification failed"
+            )
         
-    Raises:
-        HTTPException: If verification fails
-    """
-    logger.info(f"Verifying payment: {payment_data.reference}, user: {current_user.email}")
-    
-    # Verify payment with Paystack
-    payment_info = await PaymentService.verify_payment(payment_data.reference)
-    
-    # Extract order ID from reference
-    order_id = payment_info["metadata"]["order_id"]
-    
-    # Verify order belongs to user
-    order = await OrderService.get_order_by_id(db, order_id, current_user.id)
-    
-    # Update payment status based on Paystack response
-    if payment_info["status"] == "success":
-        await OrderService.update_payment_status(
-            db,
-            order_id,
-            PaymentStatus.COMPLETED,
-            payment_data.reference
-        )
+        paystack_data = response.json()
         
-        # Send order confirmation email
-        await EmailService.send_order_confirmation(current_user.email, order)
-        await EmailService.send_admin_order_notification(order, current_user.email)
+        if not paystack_data.get("status"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Payment verification failed"
+            )
         
-        logger.info(f"Payment verified and completed: {payment_data.reference}")
+        transaction = paystack_data["data"]
+        
+        # Check if payment was successful
+        if transaction["status"] != "success":
+            return {
+                "status": "failed",
+                "message": "Payment was not successful",
+                "reference": reference
+            }
+        
+        # Get order from metadata
+        order_id = transaction["metadata"].get("order_id")
+        
+        if not order_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid payment reference"
+            )
+        
+        # Update order payment status
+        update_response = db.table("orders").update({
+            "payment_status": "completed",
+            "status": "processing"
+        }).eq("id", order_id).eq("payment_reference", reference).execute()
+        
+        if not update_response.data:
+            logger.error(f"Failed to update order {order_id}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Order not found"
+            )
         
         return {
             "status": "success",
             "message": "Payment verified successfully",
+            "reference": reference,
+            "amount": transaction["amount"] / 100,  # Convert back to GHS
             "order_id": order_id
         }
-    else:
-        await OrderService.update_payment_status(
-            db,
-            order_id,
-            PaymentStatus.FAILED
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Payment verification error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to verify payment"
         )
-        
-        logger.warning(f"Payment failed: {payment_data.reference}")
-        
-        return {
-            "status": "failed",
-            "message": "Payment verification failed",
-            "order_id": order_id
-        }
 
 
 @router.post("/webhook")
-async def payment_webhook(
-    request: Request,
-    x_paystack_signature: str = Header(None),
-    db: Client = Depends(get_db)
+async def paystack_webhook(
+    payload: Dict[Any, Any],
+    db=Depends(get_db)
 ):
-    """
-    Handle Paystack webhook events.
-    
-    Args:
-        request: FastAPI request object
-        x_paystack_signature: Paystack webhook signature
-        db: Database client
-        
-    Returns:
-        dict: Acknowledgment response
-        
-    Raises:
-        HTTPException: If signature verification fails
-    """
-    logger.info("Received Paystack webhook")
-    
-    # Get raw body
-    body = await request.body()
-    
-    # Verify webhook signature
-    if not PaymentService.verify_webhook_signature(body, x_paystack_signature):
-        logger.warning("Invalid webhook signature")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid signature"
-        )
-    
-    # Parse webhook data
+    """Handle Paystack webhook events."""
     try:
-        webhook_data = json.loads(body)
-        event = webhook_data.get("event")
-        data = webhook_data.get("data", {})
+        event = payload.get("event")
+        data = payload.get("data", {})
         
-        logger.info(f"Webhook event: {event}")
-        
-        # Handle charge.success event
         if event == "charge.success":
             reference = data.get("reference")
             order_id = data.get("metadata", {}).get("order_id")
             
-            if order_id:
-                # Update payment status
-                await OrderService.update_payment_status(
-                    db,
-                    order_id,
-                    PaymentStatus.COMPLETED,
-                    reference
-                )
+            if order_id and reference:
+                # Update order
+                db.table("orders").update({
+                    "payment_status": "completed",
+                    "status": "processing"
+                }).eq("id", order_id).eq("payment_reference", reference).execute()
                 
-                # Get order and user details
-                order = await OrderService.get_order_by_id(db, order_id)
-                user = await UserService.get_user_by_id(db, order.user_id)
-                
-                # Send confirmation emails
-                await EmailService.send_order_confirmation(user.email, order)
-                await EmailService.send_admin_order_notification(order, user.email)
-                
-                logger.info(f"Webhook processed: Payment completed for order {order_id}")
+                logger.info(f"Webhook: Payment successful for order {order_id}")
         
         return {"status": "success"}
-        
+    
     except Exception as e:
-        logger.error(f"Webhook processing error: {str(e)}")
-        # Return success to prevent Paystack from retrying
-        return {"status": "success"}
+        logger.error(f"Webhook error: {str(e)}")
+        return {"status": "error"}

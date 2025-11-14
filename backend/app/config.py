@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     # Paystack Configuration
     PAYSTACK_SECRET_KEY: str
     PAYSTACK_PUBLIC_KEY: str
+    FRONTEND_URL: str = "http://localhost:5173" 
     
     # Email Configuration
     EMAIL_API_KEY: str

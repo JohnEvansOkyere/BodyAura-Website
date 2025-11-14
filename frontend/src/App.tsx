@@ -9,6 +9,11 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrdersPage from './pages/OrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
+import PaymentPage from './pages/PaymentPage';
+import PaymentVerifyPage from './pages/PaymentVerifyPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminOrders from './pages/admin/AdminOrders';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -19,7 +24,7 @@ function App() {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/products" element={<ProductsPage />} />
       
-      {/* Protected Routes */}
+      {/* User Protected Routes */}
       <Route 
         path="/cart" 
         element={
@@ -49,6 +54,50 @@ function App() {
         element={
           <ProtectedRoute>
             <OrderDetailPage />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Payment Routes */}
+      <Route 
+        path="/payment/:orderId" 
+        element={
+          <ProtectedRoute>
+            <PaymentPage />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/payment/verify/:reference" 
+        element={
+          <ProtectedRoute>
+            <PaymentVerifyPage />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Admin Protected Routes */}
+      <Route 
+        path="/admin" 
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/products" 
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminProducts />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/orders" 
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminOrders />
           </ProtectedRoute>
         } 
       />

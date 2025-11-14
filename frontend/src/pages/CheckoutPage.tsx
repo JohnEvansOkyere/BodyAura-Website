@@ -1,5 +1,4 @@
 // frontend/src/pages/CheckoutPage.tsx
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +26,6 @@ export default function CheckoutPage() {
   const queryClient = useQueryClient();
   const { setCartCount } = useCartStore();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('momo_mtn');
-
   const { register, handleSubmit, formState: { errors } } = useForm<CheckoutFormData>({
     defaultValues: {
       payment_method: 'momo_mtn',
@@ -39,6 +37,15 @@ export default function CheckoutPage() {
     queryKey: ['cart'],
     queryFn: cartService.getCart,
   });
+
+  // Safe parsing for cart total_price (handles string/undefined/null)
+  const safeTotalPrice = (price: number | string | undefined | null): number => {
+    if (price === undefined || price === null) return 0;
+    const parsed = typeof price === 'number' ? price : parseFloat(price as string);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
+  const formattedTotal = safeTotalPrice(cart?.total_price).toFixed(2);
 
   // Create order mutation
   const createOrderMutation = useMutation({
@@ -59,9 +66,8 @@ export default function CheckoutPage() {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       setCartCount(0);
       toast.success('Order placed successfully!');
-      
       // Navigate to payment page (Phase 13) or orders page
-      navigate(`/orders/${order.id}`);
+      navigate(`/payment/${order.id}`);
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.detail || 'Failed to create order');
@@ -108,7 +114,6 @@ export default function CheckoutPage() {
   return (
     <>
       <Navbar />
-      
       <div className="bg-gray-50 min-h-screen py-8">
         <div className="container-custom">
           {/* Header */}
@@ -122,7 +127,6 @@ export default function CheckoutPage() {
             </button>
             <h1 className="text-4xl font-bold">Checkout</h1>
           </div>
-
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Checkout Form */}
             <div className="lg:col-span-2">
@@ -130,7 +134,6 @@ export default function CheckoutPage() {
                 {/* Shipping Information */}
                 <div className="card">
                   <h2 className="text-2xl font-bold mb-6">Shipping Information</h2>
-
                   <div className="grid md:grid-cols-2 gap-4">
                     {/* Full Name */}
                     <div className="md:col-span-2">
@@ -145,12 +148,11 @@ export default function CheckoutPage() {
                         <p className="mt-1 text-sm text-red-600">{errors.full_name.message}</p>
                       )}
                     </div>
-
                     {/* Phone */}
                     <div>
                       <label className="block text-sm font-medium mb-2">Phone Number *</label>
                       <input
-                        {...register('phone', { 
+                        {...register('phone', {
                           required: 'Phone number is required',
                           pattern: {
                             value: /^[0-9+\s-()]+$/,
@@ -165,7 +167,6 @@ export default function CheckoutPage() {
                         <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
                       )}
                     </div>
-
                     {/* City */}
                     <div>
                       <label className="block text-sm font-medium mb-2">City *</label>
@@ -179,7 +180,6 @@ export default function CheckoutPage() {
                         <p className="mt-1 text-sm text-red-600">{errors.city.message}</p>
                       )}
                     </div>
-
                     {/* Address Line 1 */}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium mb-2">Address Line 1 *</label>
@@ -193,7 +193,6 @@ export default function CheckoutPage() {
                         <p className="mt-1 text-sm text-red-600">{errors.address_line1.message}</p>
                       )}
                     </div>
-
                     {/* Address Line 2 */}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium mb-2">Address Line 2 (Optional)</label>
@@ -204,7 +203,6 @@ export default function CheckoutPage() {
                         placeholder="Apartment, suite, etc."
                       />
                     </div>
-
                     {/* Region */}
                     <div>
                       <label className="block text-sm font-medium mb-2">Region *</label>
@@ -228,7 +226,6 @@ export default function CheckoutPage() {
                         <p className="mt-1 text-sm text-red-600">{errors.region.message}</p>
                       )}
                     </div>
-
                     {/* Postal Code */}
                     <div>
                       <label className="block text-sm font-medium mb-2">Postal Code (Optional)</label>
@@ -241,11 +238,9 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 </div>
-
                 {/* Payment Method */}
                 <div className="card">
                   <h2 className="text-2xl font-bold mb-6">Payment Method</h2>
-
                   <div className="grid md:grid-cols-2 gap-4">
                     {paymentMethods.map((method) => {
                       const Icon = method.icon;
@@ -266,12 +261,10 @@ export default function CheckoutPage() {
                       );
                     })}
                   </div>
-
                   <p className="text-sm text-gray-600 mt-4">
                     You will be redirected to complete payment after placing your order.
                   </p>
                 </div>
-
                 {/* Place Order Button */}
                 <button
                   type="submit"
@@ -284,24 +277,21 @@ export default function CheckoutPage() {
                       Processing...
                     </>
                   ) : (
-                    `Place Order - GHS ${cart.total_price.toFixed(2)}`
+                    `Place Order - GHS ${formattedTotal}`
                   )}
                 </button>
               </form>
             </div>
-
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="card sticky top-24">
                 <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-
                 {/* Items */}
                 <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
                   {cart.items.map((item) => {
-                    const price = typeof item.product.price === 'string' 
-                      ? parseFloat(item.product.price) 
+                    const price = typeof item.product.price === 'string'
+                      ? parseFloat(item.product.price)
                       : item.product.price;
-                    
                     return (
                       <div key={item.id} className="flex justify-between text-sm">
                         <span className="text-gray-600">
@@ -314,23 +304,21 @@ export default function CheckoutPage() {
                     );
                   })}
                 </div>
-
                 {/* Totals */}
                 <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>GHS {cart.total_price.toFixed(2)}</span>
+                    <span>GHS {formattedTotal}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
                     <span className="text-green-600 font-medium">FREE</span>
                   </div>
                 </div>
-
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold">Total</span>
                   <span className="text-2xl font-bold text-primary-600">
-                    GHS {cart.total_price.toFixed(2)}
+                    GHS {formattedTotal}
                   </span>
                 </div>
               </div>
