@@ -8,7 +8,7 @@ import httpx
 import logging
 from typing import Dict, Any
 
-router = APIRouter(prefix="/api/payments", tags=["payments"])
+router = APIRouter()  # ✅ NO PREFIX HERE
 logger = logging.getLogger(__name__)
 
 
@@ -174,7 +174,7 @@ async def verify_payment(
             "status": "success",
             "message": "Payment verified successfully",
             "reference": reference,
-            "amount": transaction["amount"] / 100,  # Convert back to GHS
+            "amount": transaction["amount"] / 100,
             "order_id": order_id
         }
     
@@ -203,7 +203,6 @@ async def paystack_webhook(
             order_id = data.get("metadata", {}).get("order_id")
             
             if order_id and reference:
-                # Update order
                 db.table("orders").update({
                     "payment_status": "completed",
                     "status": "processing"
