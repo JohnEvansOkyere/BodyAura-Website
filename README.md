@@ -1,6 +1,5 @@
 # BodyAura-Website
 
-# Grejoy Health Products E-Commerce Platform
 
 A full-stack e-commerce platform for health products in Ghana with Mobile Money payment integration via Paystack.
 
@@ -64,7 +63,7 @@ Before you begin, ensure you have:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/grejoy-health.git
+git clone https://github.com/JohnEvansOkyere/BodyAura-Website.git
 cd grejoy-health
 ```
 
@@ -99,9 +98,9 @@ SUPABASE_URL=your_supabase_project_url
 SUPABASE_KEY=your_supabase_anon_key
 
 # JWT Secret (generate with: openssl rand -hex 32)
-JWT_SECRET_KEY=your_secret_key_here
-JWT_ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=1440
+# JWT_SECRET_KEY=your_secret_key_here
+# JWT_ALGORITHM=HS256
+# ACCESS_TOKEN_EXPIRE_MINUTES=1440
 
 # Paystack
 PAYSTACK_SECRET_KEY=sk_test_your_secret_key
@@ -164,8 +163,6 @@ source venv/bin/activate
 uvicorn app.main:app --reload --port 8000
 ```
 
-Backend runs at: http://localhost:8000
-API Docs: http://localhost:8000/docs
 
 ### Start Frontend Development Server
 ```bash
@@ -173,15 +170,9 @@ cd frontend
 npm run dev
 ```
 
-Frontend runs at: http://localhost:5173
 
 ---
 
-## 👤 Default Accounts
-
-### Admin Account
-- **Email:** admin@grejoy.com
-- **Password:** Admin123!
 
 ### Test Payment Cards
 Use these Paystack test cards:
@@ -264,7 +255,6 @@ grejoy-health/
 - `GET /api/admin/orders` - Get all orders
 - `PUT /api/admin/orders/{id}` - Update order status
 
-Full API documentation: http://localhost:8000/docs
 
 ---
 
@@ -343,7 +333,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For support, email support@vexaai.com or create an issue in the repository.
+For support, email support@okyerevansjohn.com or create an issue in the repository.
 
 ---
 
