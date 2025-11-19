@@ -1,6 +1,6 @@
 // frontend/src/pages/PaymentPage.tsx
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Loader2, CreditCard, Smartphone, AlertCircle } from 'lucide-react';

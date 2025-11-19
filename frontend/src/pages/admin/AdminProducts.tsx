@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Package } from 'lucide-react';
 import { productService } from '../../services/productService';
 import { adminService } from '../../services/adminService';
 import AdminLayout from '../../components/AdminLayout';

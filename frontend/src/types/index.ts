@@ -111,7 +111,7 @@ export interface Order {
   payment_method: PaymentMethod;
   payment_reference?: string;
   shipping_address: ShippingAddress;
-  items: OrderItem[];
+  items?: OrderItem[];
   created_at: string;
   updated_at: string;
 }
@@ -155,61 +155,4 @@ export interface SalesAnalytics {
 // API Error Type
 export interface ApiError {
   detail: string;
-}
-
-
-// Cart Types (ADD these if not already there)
-export interface CartItem {
-  id: string;
-  product_id: string;
-  quantity: number;
-  product: Product;
-  created_at: string;
-}
-
-export interface Cart {
-  items: CartItem[];
-  total_items: number;
-  total_price: number;
-}
-
-
-
-export interface CartItem {
-  id: string;
-  product_id: string;
-  quantity: number;
-  product: Product;
-  created_at: string;
-}
-
-export interface Cart {
-  items: CartItem[];
-  total_items: number;
-  total_price: number;
-}
-
-
-
-
-export interface OrderItem {
-  id: string;
-  product_id: string;
-  quantity: number;
-  price_at_time: number;
-  product?: Product;
-}
-
-export interface Order {
-  id: string;
-  user_id: string;
-  total_amount: number;
-  status: OrderStatus;
-  payment_status: PaymentStatus;
-  payment_method: PaymentMethod;
-  payment_reference?: string;
-  shipping_address: ShippingAddress;
-  items?: OrderItem[];  // Make sure this is here
-  created_at: string;
-  updated_at: string;
 }

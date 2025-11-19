@@ -29,7 +29,7 @@ export default function CartSummary({
     );
   }
 
-  const shipping = 0; // Free shipping for now
+  const shipping: number = 0; // Free shipping for now
   const tax = safeTotalPrice * 0.0; // No tax for now
   const finalTotal = safeTotalPrice + shipping + tax;
 

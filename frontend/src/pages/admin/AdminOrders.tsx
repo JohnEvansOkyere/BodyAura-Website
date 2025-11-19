@@ -1,13 +1,12 @@
 // frontend/src/pages/admin/AdminOrders.tsx
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Eye } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import AdminLayout from '../../components/AdminLayout';
 import { OrderStatusBadge, PaymentStatusBadge } from '../../components/OrderStatusBadge';
 import OrderStatusModal from '../../components/OrderStatusModal';
-import toast from 'react-hot-toast';
 import { Order } from '../../types';
 
 export default function AdminOrders() {
@@ -22,7 +21,7 @@ export default function AdminOrders() {
   });
 
   // Filter orders by search
-  const filteredOrders = ordersData?.orders?.filter((order) => {
+  const filteredOrders = ordersData?.orders?.filter((order: Order) => {
     const searchLower = searchTerm.toLowerCase();
     return (
       order.id.toLowerCase().includes(searchLower) ||
@@ -78,7 +77,7 @@ export default function AdminOrders() {
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.map((order) => {
+                {filteredOrders.map((order: Order) => {
                   const totalPrice = typeof order.total_amount === 'string'
                     ? parseFloat(order.total_amount)
                     : order.total_amount;
