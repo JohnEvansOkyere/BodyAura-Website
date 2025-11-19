@@ -23,8 +23,8 @@ class Settings(BaseSettings):
     PAYSTACK_PUBLIC_KEY: str
 
     # Email Configuration
-    EMAIL_API_KEY: str
-    EMAIL_FROM: str
+    EMAIL_API_KEY: str | None = None
+    EMAIL_FROM: str | None = None
 
     # Frontend URL for CORS
     FRONTEND_URL: str = "http://localhost:5173"
