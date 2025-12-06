@@ -14,11 +14,11 @@ export default function TrendingProducts() {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // Fetch trending products (sorted by trending_score)
+  // Fetch trending products (sorted by created_at - newest first)
   const { data: productsData, isLoading } = useQuery({
     queryKey: ['trending-products'],
     queryFn: () => productService.getProducts({
-      sort_by: 'trending_score',
+      sort_by: 'created_at',
       sort_order: 'desc',
       limit: 12,
     }),

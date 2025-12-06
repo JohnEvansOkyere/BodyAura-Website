@@ -3,12 +3,42 @@
 import api from './api';
 import { Product, Order } from '../types';
 
+interface SalesTrendDay {
+  date: string;
+  day: string;
+  revenue: number;
+  orders: number;
+}
+
+interface TopProduct {
+  product_id: string;
+  total_quantity: number;
+  total_revenue: number;
+  name?: string;
+  image_url?: string;
+  category?: string;
+}
+
+interface LowStockProduct {
+  id: string;
+  name: string;
+  stock_quantity: number;
+  image_urls: string[];
+  category: string;
+}
+
 interface DashboardStats {
   total_orders: number;
   total_revenue: number;
   pending_orders: number;
   total_products: number;
   low_stock_products: number;
+  total_users: number;
+  new_users_this_month: number;
+  sales_trend: SalesTrendDay[];
+  top_products: TopProduct[];
+  low_stock_details: LowStockProduct[];
+  recent_orders: any[];
 }
 
 interface CreateProductData {
@@ -25,7 +55,7 @@ interface UpdateProductData extends Partial<CreateProductData> {
 }
 
 interface UpdateOrderStatusData {
-  status?: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  order_status?: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   payment_status?: 'pending' | 'completed' | 'failed';
 }
 

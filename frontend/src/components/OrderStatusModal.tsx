@@ -19,7 +19,7 @@ export default function OrderStatusModal({ order, onClose, onSuccess }: OrderSta
 
   const mutation = useMutation({
     mutationFn: () => adminService.updateOrderStatus(order.id, {
-      status: orderStatus,
+      order_status: orderStatus,
       payment_status: paymentStatus,
     }),
     onSuccess: () => {

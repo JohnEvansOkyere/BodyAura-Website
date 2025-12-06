@@ -42,9 +42,9 @@ export default function RecommendedProducts() {
         });
       }
 
-      // Fallback: show trending products
+      // Fallback: show newest products
       return productService.getProducts({
-        sort_by: 'trending_score',
+        sort_by: 'created_at',
         sort_order: 'desc',
         limit: 8,
       });
