@@ -6,6 +6,7 @@ interface PaystackConfig {
   key: string;
   email: string;
   amount: number;
+  currency?: string;
   ref: string;
   callback: (response: any) => void;
   onClose: () => void;
@@ -24,10 +25,11 @@ export const usePaystack = () => {
     
     script.onload = () => {
       // @ts-ignore - PaystackPop is loaded from external script
-      const handler = window.PaystackPop.setup({
+      const paystackConfig: any = {
         key: config.key,
         email: config.email,
         amount: config.amount, // Amount in kobo (pesewas)
+        currency: config.currency || 'GHS', // Default to GHS
         ref: config.ref,
         callback: (response: any) => {
           setIsLoading(false);
@@ -37,8 +39,10 @@ export const usePaystack = () => {
           setIsLoading(false);
           config.onClose();
         },
-      });
+      };
 
+      // @ts-ignore
+      const handler = window.PaystackPop.setup(paystackConfig);
       handler.openIframe();
     };
 

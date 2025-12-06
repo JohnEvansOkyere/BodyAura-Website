@@ -48,6 +48,7 @@ export default function PaymentPage() {
         key: publicKey,
         email: user!.email,
         amount: amountInPesewas,
+        currency: 'GHS',
         ref: data.reference,
         callback: (response) => {
           // Payment successful
