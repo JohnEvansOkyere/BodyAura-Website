@@ -131,9 +131,9 @@ export default function CheckoutPage() {
             {/* Checkout Form */}
             <div className="lg:col-span-2">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                {/* Shipping Information */}
+                {/* Delivery Information */}
                 <div className="card">
-                  <h2 className="text-2xl font-bold mb-6">Shipping Information</h2>
+                  <h2 className="text-2xl font-bold mb-6">Delivery Information</h2>
                   <div className="grid md:grid-cols-2 gap-4">
                     {/* Full Name */}
                     <div className="md:col-span-2">
@@ -311,7 +311,7 @@ export default function CheckoutPage() {
                     <span>GHS {formattedTotal}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
-                    <span>Shipping</span>
+                    <span>Delivery</span>
                     <span className="text-green-600 font-medium">FREE</span>
                   </div>
                 </div>

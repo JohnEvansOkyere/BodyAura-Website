@@ -38,6 +38,11 @@ export interface Product {
   stock_quantity: number;
   image_urls: string[];
   is_active: boolean;
+  video_url?: string;
+  trending_score?: number;
+  view_count?: number;
+  purchase_count?: number;
+  shipping_cost?: number;
   created_at: string;
   updated_at: string;
 }
@@ -112,6 +117,7 @@ export interface Order {
   payment_reference?: string;
   shipping_address: ShippingAddress;
   items?: OrderItem[];
+  shipping_cost?: number;
   created_at: string;
   updated_at: string;
 }
@@ -119,6 +125,7 @@ export interface Order {
 export interface CreateOrderData {
   shipping_address: ShippingAddress;
   payment_method: PaymentMethod;
+  shipping_cost?: number;
 }
 
 export interface OrdersResponse {

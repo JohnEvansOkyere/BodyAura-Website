@@ -1,22 +1,25 @@
 // frontend/src/components/CartSummary.tsx
 import { ShoppingBag } from 'lucide-react';
+import { CartItem } from '../types';
 
 interface CartSummaryProps {
   totalItems: number;
-  totalPrice: number | string;  // Allow string for API responses; handle conversion inside
+  totalPrice: number | string;
+  cartItems?: CartItem[];
   onCheckout: () => void;
   isCheckingOut?: boolean;
 }
 
-export default function CartSummary({ 
-  totalItems, 
-  totalPrice, 
-  onCheckout, 
-  isCheckingOut 
+export default function CartSummary({
+  totalItems,
+  totalPrice,
+  cartItems = [],
+  onCheckout,
+  isCheckingOut
 }: CartSummaryProps) {
   // Safely convert totalPrice to number (handles string, undefined, null)
-  const safeTotalPrice = typeof totalPrice === 'number' 
-    ? totalPrice 
+  const safeTotalPrice = typeof totalPrice === 'number'
+    ? totalPrice
     : parseFloat(totalPrice as string) || 0;
 
   // Early return if total is invalid (optional: for debugging/error state)
@@ -29,9 +32,14 @@ export default function CartSummary({
     );
   }
 
-  const shipping: number = 0; // Free shipping for now
+  // Calculate delivery cost from cart items
+  const delivery: number = cartItems.reduce((total, item) => {
+    const itemDelivery = item.product.shipping_cost || 0;
+    return total + (itemDelivery * item.quantity);
+  }, 0);
+
   const tax = safeTotalPrice * 0.0; // No tax for now
-  const finalTotal = safeTotalPrice + shipping + tax;
+  const finalTotal = safeTotalPrice + delivery + tax;
 
   return (
     <div className="card sticky top-24">
@@ -40,12 +48,12 @@ export default function CartSummary({
       <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
         <div className="flex justify-between text-gray-600">
           <span>Items ({totalItems})</span>
-          <span>GHS {safeTotalPrice.toFixed(2)}</span>  {/* Now safe! */}
+          <span>GHS {safeTotalPrice.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-gray-600">
-          <span>Shipping</span>
-          <span className="text-green-600 font-medium">
-            {shipping === 0 ? 'FREE' : `GHS ${shipping.toFixed(2)}`}
+          <span>Delivery</span>
+          <span className={delivery === 0 ? "text-green-600 font-medium" : "text-gray-900 font-medium"}>
+            {delivery === 0 ? 'FREE' : `GHS ${delivery.toFixed(2)}`}
           </span>
         </div>
         {tax > 0 && (
@@ -74,7 +82,11 @@ export default function CartSummary({
       {/* Info */}
       <div className="mt-4 p-3 bg-blue-50 rounded-lg">
         <p className="text-sm text-blue-800">
-          <strong>Free Shipping</strong> on all orders within Ghana!
+          {delivery === 0 ? (
+            <><strong>Free Delivery</strong> on all orders within Ghana!</>
+          ) : (
+            <>Delivery costs calculated based on your items</>
+          )}
         </p>
       </div>
     </div>

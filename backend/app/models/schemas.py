@@ -96,6 +96,11 @@ class ProductBase(BaseModel):
     category: Optional[str] = Field(None, max_length=100)
     stock_quantity: int = Field(..., ge=0)
     is_active: bool = True
+    video_url: Optional[str] = None
+    trending_score: int = Field(default=0, ge=0)
+    view_count: int = Field(default=0, ge=0)
+    purchase_count: int = Field(default=0, ge=0)
+    shipping_cost: Decimal = Field(default=Decimal('0.00'), ge=0, decimal_places=2)
 
 
 class ProductCreate(ProductBase):
@@ -112,6 +117,11 @@ class ProductUpdate(BaseModel):
     stock_quantity: Optional[int] = Field(None, ge=0)
     is_active: Optional[bool] = None
     image_urls: Optional[List[str]] = None
+    video_url: Optional[str] = None
+    trending_score: Optional[int] = Field(None, ge=0)
+    view_count: Optional[int] = Field(None, ge=0)
+    purchase_count: Optional[int] = Field(None, ge=0)
+    shipping_cost: Optional[Decimal] = Field(None, ge=0, decimal_places=2)
 
 
 class ProductResponse(ProductBase):
@@ -199,6 +209,7 @@ class OrderCreate(BaseModel):
     """Schema for creating a new order"""
     shipping_address: ShippingAddress
     payment_method: PaymentMethod
+    shipping_cost: Decimal = Field(default=Decimal('0.00'), ge=0, decimal_places=2)
 
 
 class OrderResponse(BaseModel):
@@ -212,9 +223,10 @@ class OrderResponse(BaseModel):
     payment_reference: Optional[str] = None
     shipping_address: dict
     items: List[OrderItemResponse] = []
+    shipping_cost: Decimal = Field(default=Decimal('0.00'), ge=0, decimal_places=2)
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
