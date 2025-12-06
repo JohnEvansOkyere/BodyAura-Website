@@ -1,7 +1,8 @@
 // frontend/src/components/ProductFormModal.tsx
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { X, Loader2, Image as ImageIcon } from 'lucide-react';
+import { X, Loader2, Image as ImageIcon, Upload, Trash2 } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { adminService } from '../services/adminService';
 import { Product } from '../types';
@@ -19,7 +20,6 @@ interface ProductFormData {
   price: number;
   category: string;
   stock_quantity: number;
-  image_urls: string;
   video_url: string;
   is_active: boolean;
   is_trending: boolean;
@@ -41,6 +41,8 @@ const CHINA_CATEGORIES = [
 
 export default function ProductFormModal({ product, onClose, onSuccess }: ProductFormModalProps) {
   const isEditing = !!product;
+  const [uploadedImages, setUploadedImages] = useState<string[]>(product?.image_urls || []);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   const { register, handleSubmit, formState: { errors }, watch } = useForm<ProductFormData>({
     defaultValues: product ? {
@@ -49,7 +51,6 @@ export default function ProductFormModal({ product, onClose, onSuccess }: Produc
       price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
       category: product.category,
       stock_quantity: product.stock_quantity,
-      image_urls: product.image_urls?.join('\n') || '',
       video_url: product.video_url || '',
       is_active: product.is_active,
       is_trending: (product.trending_score || 0) > 0,
@@ -62,13 +63,59 @@ export default function ProductFormModal({ product, onClose, onSuccess }: Produc
     },
   });
 
+  // Image upload handler
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingImages(true);
+    const newImageUrls: string[] = [];
+
+    try {
+      // Upload each file
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`${file.name} is too large. Max size is 5MB`);
+          continue;
+        }
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          toast.error(`${file.name} is not an image`);
+          continue;
+        }
+
+        try {
+          const imageUrl = await adminService.uploadImage(file);
+          newImageUrls.push(imageUrl);
+          toast.success(`${file.name} uploaded successfully`);
+        } catch (error) {
+          toast.error(`Failed to upload ${file.name}`);
+        }
+      }
+
+      setUploadedImages([...uploadedImages, ...newImageUrls]);
+    } finally {
+      setUploadingImages(false);
+      // Reset input
+      e.target.value = '';
+    }
+  };
+
+  // Remove image handler
+  const handleRemoveImage = (index: number) => {
+    setUploadedImages(uploadedImages.filter((_, i) => i !== index));
+  };
+
   // Create/Update mutation
   const mutation = useMutation({
     mutationFn: (data: ProductFormData) => {
-      const imageUrls = data.image_urls
-        .split('\n')
-        .map(url => url.trim())
-        .filter(url => url.length > 0);
+      if (uploadedImages.length === 0) {
+        throw new Error('Please upload at least one product image');
+      }
 
       const productData = {
         name: data.name,
@@ -76,9 +123,9 @@ export default function ProductFormModal({ product, onClose, onSuccess }: Produc
         price: data.price,
         category: data.category,
         stock_quantity: data.stock_quantity,
-        image_urls: imageUrls,
+        image_urls: uploadedImages,
         video_url: data.video_url?.trim() || undefined,
-        shipping_cost: data.free_delivery ? 0 : 10, // Default delivery cost if not free
+        shipping_cost: data.free_delivery ? 0 : 10,
         is_active: data.is_active,
         trending_score: data.is_trending ? 100 : 0,
       };
@@ -93,8 +140,9 @@ export default function ProductFormModal({ product, onClose, onSuccess }: Produc
       toast.success(isEditing ? 'Product updated!' : 'Product created!');
       onSuccess();
     },
-    onError: () => {
-      toast.error('Failed to save product');
+    onError: (error: any) => {
+      const message = error.message || 'Failed to save product';
+      toast.error(message);
     },
   });
 
@@ -116,7 +164,7 @@ export default function ProductFormModal({ product, onClose, onSuccess }: Produc
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-4 flex justify-between items-center z-10 rounded-t-lg">
           <h2 className="text-2xl font-bold">
-            {isEditing ? '✏️ Edit Product' : '➕ Add New Product'}
+            {isEditing ? 'Edit Product' : 'Add New Product'}
           </h2>
           <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition">
             <X className="w-6 h-6" />
@@ -209,27 +257,61 @@ export default function ProductFormModal({ product, onClose, onSuccess }: Produc
             </div>
           </div>
 
-          {/* Image URLs */}
-          <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
-            <div className="flex items-center space-x-2 mb-2">
-              <ImageIcon className="w-5 h-5 text-gray-600" />
-              <label className="block text-sm font-semibold text-gray-700">Product Images (URLs) *</label>
+          {/* Image Upload */}
+          <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg p-4 border-2 border-dashed border-orange-300">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2">
+                <ImageIcon className="w-5 h-5 text-orange-600" />
+                <label className="block text-sm font-semibold text-gray-700">Product Images *</label>
+              </div>
+              <label className="btn btn-sm bg-gradient-to-r from-orange-600 to-red-600 text-white cursor-pointer hover:from-orange-700 hover:to-red-700">
+                <Upload className="w-4 h-4 mr-2" />
+                {uploadingImages ? 'Uploading...' : 'Upload Images'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageUpload}
+                  disabled={uploadingImages}
+                  className="hidden"
+                />
+              </label>
             </div>
-            <textarea
-              {...register('image_urls', { required: 'At least one image URL is required' })}
-              rows={3}
-              className={`input ${errors.image_urls ? 'input-error' : ''}`}
-              placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg&#10;https://example.com/image3.jpg"
-            />
-            <p className="mt-2 text-xs text-gray-600">
-              📸 Add one image URL per line (you can add multiple images)
-            </p>
-            <p className="mt-1 text-xs text-gray-500">
-              💡 Tip: Upload images to imgur.com or imgbb.com and paste the URLs here
-            </p>
-            {errors.image_urls && (
-              <p className="mt-1 text-sm text-red-600">{errors.image_urls.message}</p>
+
+            {/* Uploaded Images Preview */}
+            {uploadedImages.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {uploadedImages.map((url, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={url}
+                      alt={`Product ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg border-2 border-white shadow-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                    <div className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs px-2 py-0.5 rounded">
+                      {index + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <ImageIcon className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                <p className="text-sm">No images uploaded yet</p>
+                <p className="text-xs mt-1">Click "Upload Images" to add product photos</p>
+              </div>
             )}
+
+            <p className="mt-3 text-xs text-gray-600">
+              Accepted formats: JPG, PNG, WebP • Max size: 5MB per image
+            </p>
           </div>
 
           {/* Video URL */}
@@ -242,7 +324,7 @@ export default function ProductFormModal({ product, onClose, onSuccess }: Produc
               placeholder="https://youtube.com/watch?v=... or https://example.com/video.mp4"
             />
             <p className="mt-1 text-xs text-gray-600">
-              🎥 Add a YouTube link or direct video URL to showcase your product
+              Add a YouTube link or direct video URL to showcase your product
             </p>
           </div>
 
@@ -259,7 +341,7 @@ export default function ProductFormModal({ product, onClose, onSuccess }: Produc
                   className="w-5 h-5 text-red-600 rounded"
                 />
                 <label htmlFor="is_active" className="text-sm font-medium text-gray-700">
-                  ✅ Product is active (visible to customers)
+                  Product is active (visible to customers)
                 </label>
               </div>
             </div>
@@ -273,7 +355,7 @@ export default function ProductFormModal({ product, onClose, onSuccess }: Produc
                   className="w-5 h-5 text-red-600 rounded"
                 />
                 <label htmlFor="is_trending" className="text-sm font-medium text-gray-700">
-                  🔥 Mark as trending product
+                  Mark as trending product
                 </label>
               </div>
             </div>
@@ -287,11 +369,11 @@ export default function ProductFormModal({ product, onClose, onSuccess }: Produc
                   className="w-5 h-5 text-green-600 rounded"
                 />
                 <label htmlFor="free_delivery" className="text-sm font-medium text-gray-700">
-                  🚚 Free Delivery
+                  Free Delivery
                 </label>
               </div>
               <span className="text-xs text-gray-600">
-                {watch('free_delivery') ? '✓ Free delivery' : 'GHS 10.00 delivery charge'}
+                {watch('free_delivery') ? 'Free delivery' : 'GHS 10.00 delivery charge'}
               </span>
             </div>
           </div>
@@ -302,14 +384,14 @@ export default function ProductFormModal({ product, onClose, onSuccess }: Produc
               type="button"
               onClick={onClose}
               className="px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-100 transition"
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || uploadingImages}
             >
               Cancel
             </button>
             <button
               type="submit"
               className="px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-lg font-semibold hover:from-red-700 hover:to-orange-700 transition disabled:opacity-50"
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || uploadingImages || uploadedImages.length === 0}
             >
               {mutation.isPending ? (
                 <>
@@ -317,7 +399,7 @@ export default function ProductFormModal({ product, onClose, onSuccess }: Produc
                   Saving...
                 </>
               ) : (
-                isEditing ? '💾 Update Product' : '➕ Create Product'
+                isEditing ? 'Update Product' : 'Create Product'
               )}
             </button>
           </div>

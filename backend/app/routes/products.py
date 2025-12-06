@@ -183,6 +183,38 @@ async def delete_product(
     return SuccessResponse(**result)
 
 
+@router.post("/upload-image", response_model=dict)
+async def upload_image(
+    file: UploadFile = File(...),
+    current_user: UserResponse = Depends(get_current_admin_user),
+    db: Client = Depends(get_db)
+):
+    """
+    Upload a product image without associating it to a product yet (admin only).
+    Returns the image URL to be used when creating/updating a product.
+
+    Args:
+        file: Image file to upload
+        current_user: Current authenticated admin user
+        db: Database client
+
+    Returns:
+        dict: Upload result with image URL
+
+    Raises:
+        HTTPException: If user is not admin or upload fails
+    """
+    logger.info(f"Uploading image by admin: {current_user.email}")
+
+    # Upload image
+    image_url = await ProductService.upload_product_image(db, file)
+
+    return {
+        "message": "Image uploaded successfully",
+        "image_url": image_url
+    }
+
+
 @router.post("/{product_id}/images", response_model=dict)
 async def upload_product_image(
     product_id: str,
@@ -192,38 +224,38 @@ async def upload_product_image(
 ):
     """
     Upload a product image (admin only).
-    
+
     Args:
         product_id: Product ID to associate image with
         file: Image file to upload
         current_user: Current authenticated admin user
         db: Database client
-        
+
     Returns:
         dict: Upload result with image URL
-        
+
     Raises:
         HTTPException: If user is not admin, product not found, or upload fails
     """
     logger.info(f"Uploading image for product: {product_id} by admin: {current_user.email}")
-    
+
     # Verify product exists
     product = await ProductService.get_product_by_id(db, product_id)
-    
+
     # Upload image
     image_url = await ProductService.upload_product_image(db, file)
-    
+
     # Add image URL to product
     current_images = product.image_urls or []
     updated_images = current_images + [image_url]
-    
+
     # Update product with new image URL
     await ProductService.update_product(
         db,
         product_id,
         ProductUpdate(image_urls=updated_images)
     )
-    
+
     return {
         "message": "Image uploaded successfully",
         "image_url": image_url
