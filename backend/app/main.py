@@ -26,10 +26,11 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "https://body-aura-website.vercel.app",
-    "http://localhost:5173",
-    "http://localhost:3000",
-],
+        "https://body-aura-website.vercel.app",
+        "https://grejoy-china-mall.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
