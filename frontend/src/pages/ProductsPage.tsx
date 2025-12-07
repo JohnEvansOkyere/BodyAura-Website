@@ -1,6 +1,6 @@
 // frontend/src/pages/ProductsPage.tsx
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Filter, X } from 'lucide-react';
 import { productService } from '../services/productService';
@@ -12,20 +12,33 @@ import ProductDetailModal from '../components/ProductDetailModal';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function ProductsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
   const { incrementCart } = useCartStore();
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [searchParams] = useSearchParams();
+
+  // Read URL parameters and set initial state
+  const urlCategory = searchParams.get('category') || '';
+  const urlSearch = searchParams.get('search') || '';
+
+  const [searchTerm, setSearchTerm] = useState(urlSearch);
+  const [selectedCategory, setSelectedCategory] = useState<string>(urlCategory);
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  // Update state when URL parameters change
+  useEffect(() => {
+    const category = searchParams.get('category') || '';
+    const search = searchParams.get('search') || '';
+    setSelectedCategory(category);
+    setSearchTerm(search);
+  }, [searchParams]);
 
   // Fetch categories
   const { data: categories = [] } = useQuery({
