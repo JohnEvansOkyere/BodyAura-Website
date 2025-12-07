@@ -14,8 +14,6 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
 import ProtectedRoute from './components/ProtectedRoute';
-import ChatWidget from './components/ChatWidget';
-import N8nChat from './components/N8nChat';
 
 function App() {
   return (
@@ -104,13 +102,6 @@ function App() {
           } 
         />
       </Routes>
-
-      {/* Chat Widget - Available on all pages */}
-      <ChatWidget />
-
-
-      {/* n8n Chat Widget */}
-      <N8nChat />
     </>
   );
 }
