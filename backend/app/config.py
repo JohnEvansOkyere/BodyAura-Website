@@ -1,5 +1,5 @@
 # backend/app/config.py
-
+from typing import List
 from pydantic_settings import BaseSettings
 
 
@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     EMAIL_FROM: str | None = None
 
     # Frontend URL for CORS
-    FRONTEND_URL: str = "http://localhost:5173"
+    FRONTEND_URLS: List[str] = ["http://localhost:5173"]
 
     # Environment
     ENVIRONMENT: str = "development"
