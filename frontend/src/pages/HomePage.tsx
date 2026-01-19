@@ -79,33 +79,35 @@ export default function HomePage() {
 
             {/* Main Products Area */}
             <main>
-              {/* Recommended Products Section */}
-              <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
-                      <Heart className="w-6 h-6 text-pink-600" />
+              {/* Recommended Products Section - Only for logged-in users */}
+              {isAuthenticated && (
+                <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                        <Heart className="w-6 h-6 text-pink-600" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900">
+                          Recommended for You
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                          Based on your cart items
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900">
-                        Recommended for You
-                      </h2>
-                      <p className="text-sm text-gray-600">
-                        Based on your interests
-                      </p>
-                    </div>
+                    <Link
+                      to="/products"
+                      className="text-red-600 hover:text-red-700 font-medium flex items-center space-x-1"
+                    >
+                      <span>View All</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
                   </div>
-                  <Link
-                    to="/products"
-                    className="text-red-600 hover:text-red-700 font-medium flex items-center space-x-1"
-                  >
-                    <span>View All</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
 
-                <RecommendedProducts />
-              </div>
+                  <RecommendedProducts />
+                </div>
+              )}
 
               {/* All Products Section */}
               <div className="bg-white rounded-lg shadow-sm p-6">

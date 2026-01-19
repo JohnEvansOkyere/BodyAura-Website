@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Loader2 } from 'lucide-react';
 import { productService } from '../services/productService';
-import { cartService } from '../services/cartService';
 import ProductCard from './ProductCard';
 import ProductDetailsModal from './ProductDetailsModal';
 import { useAuthStore } from '../store/authStore';
@@ -17,41 +16,12 @@ export default function RecommendedProducts() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { isAuthenticated } = useAuthStore();
 
-  // Fetch user's cart to get categories
-  const { data: cart } = useQuery({
-    queryKey: ['cart'],
-    queryFn: cartService.getCart,
-    enabled: isAuthenticated,
+  // Fetch personalized recommendations using the new smart API
+  const { data: products, isLoading } = useQuery({
+    queryKey: ['personalized-recommendations'],
+    queryFn: () => productService.getPersonalizedRecommendations(8),
+    enabled: isAuthenticated, // Only fetch if user is authenticated
   });
-
-  // Extract categories from cart items
-  const cartCategories = cart?.items
-    ?.map(item => item.product.category)
-    .filter((category, index, self) => category && self.indexOf(category) === index) || [];
-
-  // Fetch recommended products based on cart categories
-  const { data: recommendedData, isLoading } = useQuery({
-    queryKey: ['recommended-products', cartCategories],
-    queryFn: async () => {
-      // If user has cart items, recommend from same categories
-      if (cartCategories.length > 0) {
-        const category = cartCategories[0]; // Use first category
-        return productService.getProducts({
-          category,
-          limit: 8,
-        });
-      }
-
-      // Fallback: show newest products
-      return productService.getProducts({
-        sort_by: 'created_at',
-        sort_order: 'desc',
-        limit: 8,
-      });
-    },
-  });
-
-  const products = recommendedData?.products || [];
 
   if (isLoading) {
     return (
@@ -61,7 +31,7 @@ export default function RecommendedProducts() {
     );
   }
 
-  if (products.length === 0) {
+  if (!products || products.length === 0) {
     return null;
   }
 

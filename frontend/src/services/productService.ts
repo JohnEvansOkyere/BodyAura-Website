@@ -49,4 +49,41 @@ export const productService = {
     const response = await api.get<string[]>('/api/products/categories');
     return response.data;
   },
+
+  /**
+   * Get personalized product recommendations
+   */
+  getPersonalizedRecommendations: async (limit: number = 12): Promise<Product[]> => {
+    const response = await api.get<Product[]>(`/api/products/recommendations/personalized?limit=${limit}`);
+    return response.data;
+  },
+
+  /**
+   * Get products similar to a given product
+   */
+  getSimilarProducts: async (productId: string, limit: number = 8): Promise<Product[]> => {
+    const response = await api.get<Product[]>(`/api/products/${productId}/similar?limit=${limit}`);
+    return response.data;
+  },
+
+  /**
+   * Get products frequently bought together
+   */
+  getFrequentlyBoughtTogether: async (productId: string, limit: number = 4): Promise<Product[]> => {
+    const response = await api.get<Product[]>(`/api/products/${productId}/frequently-bought-together?limit=${limit}`);
+    return response.data;
+  },
+
+  /**
+   * Track a product view
+   */
+  trackProductView: async (productId: string, source?: string): Promise<void> => {
+    try {
+      const params = source ? `?source=${encodeURIComponent(source)}` : '';
+      await api.post(`/api/products/${productId}/track-view${params}`);
+    } catch (error) {
+      // Silently fail - tracking shouldn't break user experience
+      console.warn('Failed to track product view:', error);
+    }
+  },
 };

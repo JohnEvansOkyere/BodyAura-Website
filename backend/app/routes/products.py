@@ -5,6 +5,7 @@ from supabase import Client
 from app.database import get_db
 from app.models.schemas import ProductCreate, ProductUpdate, ProductResponse, SuccessResponse
 from app.services.product_service import ProductService
+from app.services.recommendation_service import RecommendationService
 from app.middleware.auth import get_current_admin_user, optional_current_user, get_current_user
 from app.models.schemas import UserResponse
 from typing import List, Optional
@@ -260,3 +261,137 @@ async def upload_product_image(
         "message": "Image uploaded successfully",
         "image_url": image_url
     }
+
+
+@router.get("/recommendations/personalized", response_model=List[ProductResponse])
+async def get_personalized_recommendations(
+    limit: int = Query(12, ge=1, le=50, description="Maximum number of recommendations"),
+    current_user: Optional[UserResponse] = Depends(optional_current_user),
+    db: Client = Depends(get_db)
+):
+    """
+    Get personalized product recommendations.
+    
+    Uses multiple strategies:
+    - Purchase history based recommendations
+    - Cart-based recommendations
+    - Browsing history recommendations
+    - Collaborative filtering
+    - Trending products
+    
+    Args:
+        limit: Maximum number of recommendations
+        current_user: Current user (optional)
+        db: Database client
+        
+    Returns:
+        List[ProductResponse]: Recommended products
+    """
+    user_id = current_user.id if current_user else None
+    
+    logger.info(f"Getting personalized recommendations for user: {user_id or 'anonymous'}")
+    
+    recommendations = await RecommendationService.get_personalized_recommendations(
+        db=db,
+        user_id=user_id,
+        limit=limit
+    )
+    
+    return recommendations
+
+
+@router.get("/{product_id}/similar", response_model=List[ProductResponse])
+async def get_similar_products(
+    product_id: str,
+    limit: int = Query(8, ge=1, le=20, description="Maximum number of similar products"),
+    db: Client = Depends(get_db)
+):
+    """
+    Get products similar to the given product.
+    Based on same category and price range.
+    
+    Args:
+        product_id: Product ID
+        limit: Maximum number of similar products
+        db: Database client
+        
+    Returns:
+        List[ProductResponse]: Similar products
+    """
+    logger.info(f"Getting similar products for: {product_id}")
+    
+    similar_products = await RecommendationService.get_similar_products(
+        db=db,
+        product_id=product_id,
+        limit=limit
+    )
+    
+    return similar_products
+
+
+@router.get("/{product_id}/frequently-bought-together", response_model=List[ProductResponse])
+async def get_frequently_bought_together(
+    product_id: str,
+    limit: int = Query(4, ge=1, le=10, description="Maximum number of products"),
+    db: Client = Depends(get_db)
+):
+    """
+    Get products frequently bought together with the given product.
+    
+    Args:
+        product_id: Product ID
+        limit: Maximum number of products
+        db: Database client
+        
+    Returns:
+        List[ProductResponse]: Products frequently bought together
+    """
+    logger.info(f"Getting frequently bought together for: {product_id}")
+    
+    products = await RecommendationService.get_frequently_bought_together(
+        db=db,
+        product_id=product_id,
+        limit=limit
+    )
+    
+    return products
+
+
+@router.post("/{product_id}/track-view", response_model=SuccessResponse)
+async def track_product_view(
+    product_id: str,
+    source: Optional[str] = Query(None, description="Source of the view (e.g., search, category, recommendation)"),
+    current_user: Optional[UserResponse] = Depends(optional_current_user),
+    db: Client = Depends(get_db)
+):
+    """
+    Track a product view for recommendation purposes.
+    
+    Args:
+        product_id: Product ID
+        source: Source of the view
+        current_user: Current user (optional)
+        db: Database client
+        
+    Returns:
+        SuccessResponse: Success message
+    """
+    user_id = current_user.id if current_user else None
+    
+    # For anonymous users, we could use session ID from cookies/headers
+    # For now, we'll just track with user_id if available
+    
+    success = await RecommendationService.track_product_view(
+        db=db,
+        product_id=product_id,
+        user_id=user_id,
+        source=source
+    )
+    
+    if success:
+        return SuccessResponse(message="Product view tracked successfully")
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to track product view"
+        )

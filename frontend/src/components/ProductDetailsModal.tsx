@@ -1,10 +1,11 @@
 // frontend/src/components/ProductDetailsModal.tsx
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Plus, Minus, ShoppingCart, Heart, Share2, Star, Package, Truck } from 'lucide-react';
 import { Product } from '../types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartService } from '../services/cartService';
+import { productService } from '../services/productService';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -22,6 +23,11 @@ export default function ProductDetailsModal({ product, onClose }: ProductDetails
   const queryClient = useQueryClient();
 
   console.log('ProductDetailsModal rendered with product:', product.name);
+
+  // Track product view when modal opens
+  useEffect(() => {
+    productService.trackProductView(product.id, 'modal');
+  }, [product.id]);
 
   const addToCartMutation = useMutation({
     mutationFn: (quantity: number) => cartService.addToCart(product.id, quantity),

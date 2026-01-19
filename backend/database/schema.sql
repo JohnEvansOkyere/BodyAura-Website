@@ -28,14 +28,22 @@ CREATE TABLE IF NOT EXISTS products (
     category TEXT,
     stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
     image_urls TEXT[],
+    video_url TEXT,
     is_active BOOLEAN DEFAULT TRUE,
+    trending_score INTEGER NOT NULL DEFAULT 0,
+    view_count INTEGER NOT NULL DEFAULT 0,
+    purchase_count INTEGER NOT NULL DEFAULT 0,
+    shipping_cost DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create index on category for filtering
+-- Create indexes on products for filtering and sorting
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 CREATE INDEX IF NOT EXISTS idx_products_is_active ON products(is_active);
+CREATE INDEX IF NOT EXISTS idx_products_trending_score ON products(trending_score DESC);
+CREATE INDEX IF NOT EXISTS idx_products_view_count ON products(view_count DESC);
+CREATE INDEX IF NOT EXISTS idx_products_purchase_count ON products(purchase_count DESC);
 
 -- ============================================
 -- ORDERS TABLE
