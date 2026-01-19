@@ -6,26 +6,26 @@ A full-stack e-commerce platform for health products in Ghana with Mobile Money 
 ![Project Status](https://img.shields.io/badge/status-active-success.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 
-## 🌟 Features
+## Features
 
 ### Customer Features
-- ✅ User authentication (Sign up, Login, JWT tokens)
-- 🛍️ Product catalog with search and filters
-- 🛒 Shopping cart management
-- 📦 Order placement and tracking
-- 💳 Secure payments (Mobile Money & Card via Paystack)
-- 📱 Responsive design for mobile and desktop
+- User authentication (Sign up, Login, JWT tokens)
+- Product catalog with search and filters
+- Shopping cart management
+- Order placement and tracking
+- Secure payments (Mobile Money & Card via Paystack)
+- Responsive design for mobile and desktop
 
 ### Admin Features
-- 📊 Dashboard with sales statistics
-- 📦 Product management (Create, Edit, Delete)
-- 🛍️ Order management (View, Update status)
-- 💰 Revenue tracking
-- 📈 Low stock alerts
+- Dashboard with sales statistics
+- Product management (Create, Edit, Delete)
+- Order management (View, Update status)
+- Revenue tracking
+- Low stock alerts
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Backend
 - **FastAPI** - Modern Python web framework
@@ -47,7 +47,7 @@ A full-stack e-commerce platform for health products in Ghana with Mobile Money 
 
 ---
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before you begin, ensure you have:
 
@@ -59,7 +59,7 @@ Before you begin, ensure you have:
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### 1. Clone the Repository
 ```bash
@@ -154,7 +154,7 @@ VITE_PAYSTACK_PUBLIC_KEY=pk_test_your_public_key
 
 ---
 
-## ▶️ Running the Application
+## Running the Application
 
 ### Start Backend Server
 ```bash
@@ -185,7 +185,7 @@ Use these Paystack test cards:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 ```
 grejoy-health/
 ├── backend/
@@ -221,7 +221,7 @@ grejoy-health/
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Authentication
 - `POST /api/auth/signup` - Register new user
@@ -258,13 +258,13 @@ grejoy-health/
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
-**Your app is now deployment-ready!** ✅
+**Your app is now deployment-ready!**
 
 ### Quick Start (15 minutes)
 
-**👉 Start here:** [DEPLOYMENT_QUICK_START.md](DEPLOYMENT_QUICK_START.md)
+**Start here:** [DEPLOYMENT_QUICK_START.md](docs/DEPLOYMENT_QUICK_START.md)
 
 ```bash
 # 1. Push to GitHub
@@ -272,61 +272,61 @@ git push origin main
 
 # 2. Deploy backend (Render) - via dashboard
 # 3. Deploy frontend (Vercel) - via dashboard
-# 4. Done! 🎉
+# 4. Done!
 ```
 
 ### Complete Guides
 
-- **📖 Complete Guide:** [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+- **Complete Guide:** [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)
   - Detailed step-by-step instructions
   - Troubleshooting tips
   - Production best practices
 
-- **🔐 Environment Variables:** [ENV_VARIABLES_GUIDE.md](ENV_VARIABLES_GUIDE.md)
+- **Environment Variables:** [ENV_VARIABLES_GUIDE.md](docs/ENV_VARIABLES_GUIDE.md)
   - All required variables
   - Where to get credentials
   - Security best practices
 
-- **✅ Deployment Checklist:** [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)
+- **Deployment Checklist:** [DEPLOYMENT_CHECKLIST.md](docs/DEPLOYMENT_CHECKLIST.md)
   - Step-by-step checklist
   - Verify everything works
   - Post-deployment tasks
 
-### Already Configured ✅
+### Already Configured
 
-- ✅ `backend/render.yaml` - Backend configuration
-- ✅ `frontend/vercel.json` - Frontend configuration
-- ✅ Mobile responsive design
-- ✅ Production-ready code
+- `backend/render.yaml` - Backend configuration
+- `frontend/vercel.json` - Frontend configuration
+- Mobile responsive design
+- Production-ready code
 
-**Deploy with confidence!** 🚀
+**Deploy with confidence!**
 
 ---
 
-## 📱 Mobile Responsive
+## Mobile Responsive
 
-**Fully optimized for all devices!** ✅
+**Fully optimized for all devices!**
 
-- **Quick Summary:** [MOBILE_SUMMARY.md](MOBILE_SUMMARY.md)
-- **Testing Guide:** [MOBILE_TESTING_GUIDE.md](MOBILE_TESTING_GUIDE.md)
-- **Visual Reference:** [MOBILE_VISUAL_GUIDE.md](MOBILE_VISUAL_GUIDE.md)
-- **Complete Details:** [MOBILE_RESPONSIVE_COMPLETE.md](MOBILE_RESPONSIVE_COMPLETE.md)
+- **Quick Summary:** [MOBILE_SUMMARY.md](docs/MOBILE_SUMMARY.md)
+- **Testing Guide:** [MOBILE_TESTING_GUIDE.md](docs/MOBILE_TESTING_GUIDE.md)
+- **Visual Reference:** [MOBILE_VISUAL_GUIDE.md](docs/MOBILE_VISUAL_GUIDE.md)
+- **Complete Details:** [MOBILE_RESPONSIVE_COMPLETE.md](docs/MOBILE_RESPONSIVE_COMPLETE.md)
 
 **Supported devices:**
-- 📱 Phones (320px - 767px)
-- 📊 Tablets (768px - 1023px)
-- 💻 Desktops (1024px+)
+- Phones (320px - 767px)
+- Tablets (768px - 1023px)
+- Desktops (1024px+)
 
 **Features:**
-- ✅ Touch-friendly (44px+ tap targets)
-- ✅ iOS & Android optimized
-- ✅ Responsive grids & layouts
-- ✅ Mobile navigation drawer
-- ✅ Full-screen modals on mobile
+- Touch-friendly (44px+ tap targets)
+- iOS & Android optimized
+- Responsive grids & layouts
+- Mobile navigation drawer
+- Full-screen modals on mobile
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ### Test Deployment Locally
 
@@ -366,7 +366,7 @@ npm run preview
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create your feature branch: `git checkout -b feature/AmazingFeature`
@@ -376,13 +376,13 @@ npm run preview
 
 ---
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 👨‍💻 Developer
+## Developer
 
 **Evans** - AI/ML Specialist & Full-Stack Developer
 - Company: VexaAI
@@ -390,7 +390,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **FastAPI** - Amazing Python framework
 - **Supabase** - Backend as a service
@@ -400,13 +400,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support
+## Support
 
 For support, email support@okyerevansjohn.com or create an issue in the repository.
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [ ] Email notifications
 - [ ] SMS order updates
@@ -418,4 +418,4 @@ For support, email support@okyerevansjohn.com or create an issue in the reposito
 
 ---
 
-Made with ❤️ in Ghana
+Made with love in Ghana
