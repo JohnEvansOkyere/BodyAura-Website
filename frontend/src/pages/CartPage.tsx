@@ -108,21 +108,21 @@ export default function CartPage() {
     <>
       <Navbar />
       
-      <div className="bg-gray-50 min-h-screen py-8">
+      <div className="bg-gray-50 min-h-screen py-4 sm:py-6 md:py-8">
         <div className="container-custom">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 md:mb-8 gap-3 sm:gap-0">
+            <div className="w-full sm:w-auto">
               <button
                 onClick={() => navigate('/products')}
-                className="flex items-center text-gray-600 hover:text-primary-600 mb-2 transition"
+                className="flex items-center text-gray-600 hover:text-primary-600 mb-2 transition text-sm sm:text-base"
               >
                 <ArrowLeft className="w-4 h-4 mr-1" />
                 Continue Shopping
               </button>
-              <h1 className="text-4xl font-bold">Shopping Cart</h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Shopping Cart</h1>
               {!isEmpty && (
-                <p className="text-gray-600 mt-2">
+                <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">
                   {cart.total_items} {cart.total_items === 1 ? 'item' : 'items'} in your cart
                 </p>
               )}
@@ -132,7 +132,7 @@ export default function CartPage() {
               <button
                 onClick={handleClearCart}
                 disabled={clearCartMutation.isPending}
-                className="btn btn-outline btn-sm text-red-600 border-red-600 hover:bg-red-50"
+                className="btn btn-outline btn-sm text-red-600 border-red-600 hover:bg-red-50 w-full sm:w-auto text-sm"
               >
                 Clear Cart
               </button>
@@ -141,26 +141,26 @@ export default function CartPage() {
 
           {isEmpty ? (
             /* Empty Cart State */
-            <div className="card text-center py-16">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ShoppingCart className="w-12 h-12 text-gray-400" />
+            <div className="card text-center py-12 sm:py-16">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShoppingCart className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
-              <p className="text-gray-600 mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold mb-2 px-4">Your cart is empty</h2>
+              <p className="text-gray-600 mb-6 text-sm sm:text-base px-4">
                 Start adding some products to your cart
               </p>
               <button
                 onClick={() => navigate('/products')}
-                className="btn btn-primary btn-lg"
+                className="btn btn-primary btn-md sm:btn-lg"
               >
                 Browse Products
               </button>
             </div>
           ) : (
             /* Cart with Items */
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
               {/* Cart Items */}
-              <div className="lg:col-span-2 space-y-4">
+              <div className="lg:col-span-2 space-y-3 sm:space-y-4">
                 {cart.items.map((item) => (
                   <CartItemCard
                     key={item.id}

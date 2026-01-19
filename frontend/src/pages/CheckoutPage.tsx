@@ -114,27 +114,27 @@ export default function CheckoutPage() {
   return (
     <>
       <Navbar />
-      <div className="bg-gray-50 min-h-screen py-8">
+      <div className="bg-gray-50 min-h-screen py-4 sm:py-6 md:py-8">
         <div className="container-custom">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-4 sm:mb-6 md:mb-8">
             <button
               onClick={() => navigate('/cart')}
-              className="flex items-center text-gray-600 hover:text-primary-600 mb-2 transition"
+              className="flex items-center text-gray-600 hover:text-primary-600 mb-2 transition text-sm sm:text-base"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back to Cart
             </button>
-            <h1 className="text-4xl font-bold">Checkout</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Checkout</h1>
           </div>
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {/* Checkout Form */}
             <div className="lg:col-span-2">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
                 {/* Delivery Information */}
-                <div className="card">
-                  <h2 className="text-2xl font-bold mb-6">Delivery Information</h2>
-                  <div className="grid md:grid-cols-2 gap-4">
+                <div className="card p-4 sm:p-6">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Delivery Information</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     {/* Full Name */}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium mb-2">Full Name *</label>
@@ -239,9 +239,9 @@ export default function CheckoutPage() {
                   </div>
                 </div>
                 {/* Payment Method */}
-                <div className="card">
-                  <h2 className="text-2xl font-bold mb-6">Payment Method</h2>
-                  <div className="grid md:grid-cols-2 gap-4">
+                <div className="card p-4 sm:p-6">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Payment Method</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {paymentMethods.map((method) => {
                       const Icon = method.icon;
                       return (
@@ -249,14 +249,14 @@ export default function CheckoutPage() {
                           key={method.id}
                           type="button"
                           onClick={() => setSelectedPaymentMethod(method.id)}
-                          className={`p-4 border-2 rounded-lg transition flex items-center space-x-3 ${
+                          className={`p-3 sm:p-4 border-2 rounded-lg transition flex items-center space-x-2 sm:space-x-3 touch-manipulation ${
                             selectedPaymentMethod === method.id
                               ? 'border-primary-600 bg-primary-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              : 'border-gray-200 hover:border-gray-300 active:border-gray-400'
                           }`}
                         >
-                          <Icon className="w-6 h-6 text-gray-600" />
-                          <span className="font-medium">{method.name}</span>
+                          <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 flex-shrink-0" />
+                          <span className="font-medium text-sm sm:text-base">{method.name}</span>
                         </button>
                       );
                     })}
@@ -269,7 +269,7 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={createOrderMutation.isPending}
-                  className="btn btn-primary btn-lg w-full"
+                  className="btn btn-primary w-full py-3 sm:py-4 text-base sm:text-lg touch-manipulation"
                 >
                   {createOrderMutation.isPending ? (
                     <>
@@ -284,20 +284,20 @@ export default function CheckoutPage() {
             </div>
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="card sticky top-24">
-                <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+              <div className="card p-4 sm:p-6 lg:sticky lg:top-24">
+                <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Order Summary</h2>
                 {/* Items */}
-                <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
+                <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-gray-200">
                   {cart.items.map((item) => {
                     const price = typeof item.product.price === 'string'
                       ? parseFloat(item.product.price)
                       : item.product.price;
                     return (
-                      <div key={item.id} className="flex justify-between text-sm">
-                        <span className="text-gray-600">
+                      <div key={item.id} className="flex justify-between text-xs sm:text-sm gap-2">
+                        <span className="text-gray-600 line-clamp-1">
                           {item.product.name} × {item.quantity}
                         </span>
-                        <span className="font-medium">
+                        <span className="font-medium whitespace-nowrap">
                           GHS {(price * item.quantity).toFixed(2)}
                         </span>
                       </div>
@@ -305,7 +305,7 @@ export default function CheckoutPage() {
                   })}
                 </div>
                 {/* Totals */}
-                <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
+                <div className="space-y-2 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-gray-200 text-sm sm:text-base">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
                     <span>GHS {formattedTotal}</span>
@@ -316,8 +316,8 @@ export default function CheckoutPage() {
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">Total</span>
-                  <span className="text-2xl font-bold text-primary-600">
+                  <span className="text-base sm:text-lg font-semibold">Total</span>
+                  <span className="text-xl sm:text-2xl font-bold text-primary-600">
                     GHS {formattedTotal}
                   </span>
                 </div>

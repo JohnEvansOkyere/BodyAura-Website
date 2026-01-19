@@ -10,6 +10,23 @@
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Improve text rendering on mobile */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent text size adjustment on orientation change */
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Improve touch interactions on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
   }
 }
 
@@ -86,6 +103,73 @@
   .container-custom {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
+
+  /* Mobile-specific utilities */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Improved tap targets for mobile (minimum 44x44px) */
+  .tap-target {
+    @apply min-h-[44px] min-w-[44px] inline-flex items-center justify-center;
+  }
+
+  /* Mobile-optimized grid */
+  .grid-mobile-responsive {
+    @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Mobile card spacing */
+  .card-mobile {
+    @apply p-3 sm:p-4 md:p-6;
+  }
+
+  /* Responsive text sizes */
+  .text-responsive-sm {
+    @apply text-xs sm:text-sm;
+  }
+
+  .text-responsive-base {
+    @apply text-sm sm:text-base;
+  }
+
+  .text-responsive-lg {
+    @apply text-base sm:text-lg md:text-xl;
+  }
+
+  .text-responsive-xl {
+    @apply text-lg sm:text-xl md:text-2xl;
+  }
+
+  .text-responsive-2xl {
+    @apply text-xl sm:text-2xl md:text-3xl;
+  }
+
+  /* Mobile-friendly input */
+  .input-mobile {
+    @apply text-base;  /* Prevents zoom on iOS */
+    font-size: 16px;   /* iOS Safari won't zoom if font-size >= 16px */
+  }
 }
 
 /* Custom scrollbar */
@@ -115,4 +199,107 @@
 
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+/* Mobile optimization for modal/overlay scroll */
+@layer utilities {
+  /* Prevent body scroll when modal is open */
+  .overflow-hidden-mobile {
+    @apply overflow-hidden;
+    position: fixed;
+    width: 100%;
+  }
+
+  /* Smooth momentum scrolling on iOS */
+  .scroll-smooth-mobile {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  /* Better focus visibility for accessibility */
+  .focus-visible-custom:focus-visible {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+  }
+
+  /* Prevent pull-to-refresh on mobile when not desired */
+  .no-overscroll {
+    overscroll-behavior: none;
+  }
+}
+
+/* iOS-specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Fix for iOS Safari bottom bar */
+  .min-h-screen-ios {
+    min-height: -webkit-fill-available;
+  }
+
+  /* Fix input zoom on iOS */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Android-specific fixes */
+@supports not (-webkit-touch-callout: none) {
+  /* Android Chrome optimizations */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* Landscape mobile optimizations */
+@media (max-height: 500px) and (orientation: landscape) {
+  .modal-content {
+    max-height: 95vh;
+    overflow-y: auto;
+  }
+  
+  /* Smaller padding on landscape */
+  .container-custom {
+    @apply px-3;
+  }
+}
+
+/* Small phones (320px - 374px) */
+@media (max-width: 374px) {
+  .container-custom {
+    @apply px-3;
+  }
+
+  /* Smaller text on very small screens */
+  h1 {
+    @apply text-xl;
+  }
+
+  h2 {
+    @apply text-lg;
+  }
+}
+
+/* Touch-friendly button sizing */
+@media (hover: none) and (pointer: coarse) {
+  /* This targets touch devices specifically */
+  button,
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Larger tap targets on mobile */
+  .btn {
+    @apply py-3 px-5;
+  }
 }

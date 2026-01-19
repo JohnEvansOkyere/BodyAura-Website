@@ -111,46 +111,46 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
             Dashboard
           </h1>
-          <p className="text-gray-600">Welcome to your admin dashboard - Real-time insights at a glance</p>
+          <p className="text-gray-600 text-sm sm:text-base">Welcome to your admin dashboard - Real-time insights at a glance</p>
         </div>
 
         {/* Stats Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="card animate-pulse">
-                <div className="h-24 bg-gray-200 rounded"></div>
+              <div key={i} className="card p-3 sm:p-4 md:p-6 animate-pulse">
+                <div className="h-20 sm:h-24 bg-gray-200 rounded"></div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
             {statCards.map((stat) => {
               const Icon = stat.icon;
               return (
                 <div
                   key={stat.title}
-                  className="card hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+                  className="card p-3 sm:p-4 md:p-6 hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
                 >
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
-                      <p className="text-3xl font-bold mb-1">{stat.value}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1">{stat.title}</p>
+                      <p className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 truncate">{stat.value}</p>
                       {stat.subtitle && (
                         <p className="text-xs text-gray-500 flex items-center">
-                          <ArrowUp className="w-3 h-3 text-green-500 mr-1" />
-                          {stat.subtitle}
+                          <ArrowUp className="w-3 h-3 text-green-500 mr-1 flex-shrink-0" />
+                          <span className="truncate">{stat.subtitle}</span>
                         </p>
                       )}
                     </div>
-                    <div className={`w-14 h-14 ${stat.bgColor} rounded-full flex items-center justify-center`}>
-                      <Icon className={`w-7 h-7 ${stat.textColor}`} />
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 ${stat.bgColor} rounded-full flex items-center justify-center flex-shrink-0 ml-2`}>
+                      <Icon className={`w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 ${stat.textColor}`} />
                     </div>
                   </div>
                 </div>
@@ -161,13 +161,13 @@ export default function AdminDashboard() {
 
         {/* Sales Trend Chart */}
         {stats?.sales_trend && stats.sales_trend.length > 0 && (
-          <div className="card mb-8">
-            <div className="flex items-center justify-between mb-6">
+          <div className="card p-4 sm:p-6 mb-4 sm:mb-6 md:mb-8">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div>
-                <h2 className="text-2xl font-bold mb-1">Sales Trend</h2>
-                <p className="text-sm text-gray-600">Last 7 days performance</p>
+                <h2 className="text-xl sm:text-2xl font-bold mb-1">Sales Trend</h2>
+                <p className="text-xs sm:text-sm text-gray-600">Last 7 days performance</p>
               </div>
-              <TrendingUp className="w-6 h-6 text-green-600" />
+              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0" />
             </div>
 
             {/* Simple Bar Chart */}
@@ -201,26 +201,26 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-4 sm:mb-6 md:mb-8">
           {/* Top Performing Products */}
           {stats?.top_products && stats.top_products.length > 0 && (
-            <div className="card">
-              <div className="flex items-center justify-between mb-6">
+            <div className="card p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold mb-1">Top Products</h2>
-                  <p className="text-sm text-gray-600">Best sellers by revenue</p>
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-1">Top Products</h2>
+                  <p className="text-xs sm:text-sm text-gray-600">Best sellers by revenue</p>
                 </div>
-                <Package className="w-6 h-6 text-orange-600" />
+                <Package className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 flex-shrink-0" />
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {stats.top_products.map((product: any, index: number) => (
                   <div
                     key={product.product_id}
-                    className="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg transition cursor-pointer"
+                    className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 p-2 sm:p-3 hover:bg-gray-50 active:bg-gray-100 rounded-lg transition cursor-pointer touch-manipulation"
                   >
                     <div className="flex-shrink-0 relative">
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg overflow-hidden bg-gray-100">
                         {product.image_url ? (
                           <img
                             src={product.image_url}
@@ -229,20 +229,20 @@ export default function AdminDashboard() {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <Package className="w-8 h-8 text-gray-400" />
+                            <Package className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
                           </div>
                         )}
                       </div>
-                      <div className="absolute -top-2 -left-2 w-6 h-6 bg-gradient-to-r from-red-600 to-orange-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                      <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2 w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-red-600 to-orange-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
                         {index + 1}
                       </div>
                     </div>
                     <div className="flex-grow min-w-0">
-                      <h3 className="font-semibold text-sm mb-1 truncate">{product.name}</h3>
-                      <p className="text-xs text-gray-500 mb-1">{product.category}</p>
-                      <div className="flex items-center space-x-4 text-xs">
+                      <h3 className="font-semibold text-xs sm:text-sm mb-1 truncate">{product.name}</h3>
+                      <p className="text-xs text-gray-500 mb-1 truncate">{product.category}</p>
+                      <div className="flex items-center space-x-2 sm:space-x-4 text-xs">
                         <span className="text-gray-600">{product.total_quantity} sold</span>
-                        <span className="font-semibold text-green-600">GHS {product.total_revenue.toFixed(2)}</span>
+                        <span className="font-semibold text-green-600 truncate">GHS {product.total_revenue.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
