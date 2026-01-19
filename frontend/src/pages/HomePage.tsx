@@ -16,22 +16,22 @@ export default function HomePage() {
     <>
       <Navbar />
 
-      {/* Hero Section with Search */}
-      <section className="bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 py-8">
+      {/* Hero Section with Search - Sticky */}
+      <section className="bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 py-4 sticky top-16 z-40 shadow-sm">
         <div className="container-custom">
           {/* Brand Header */}
-          <div className="text-center mb-6">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2">
+          <div className="text-center mb-4">
+            <h1 className="text-2xl md:text-3xl font-bold mb-1">
               Welcome to{' '}
               <span className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                 Grejoy China Market
               </span>
             </h1>
-            <p className="text-lg text-gray-600">Quality • Affordable • Reliable</p>
+            <p className="text-sm text-gray-600">Quality • Affordable • Reliable</p>
           </div>
 
           {/* Enhanced Search Bar */}
-          <div className="max-w-4xl mx-auto mb-6">
+          <div className="max-w-4xl mx-auto mb-3">
             <EnhancedSearchBar />
           </div>
 

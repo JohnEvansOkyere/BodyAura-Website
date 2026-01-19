@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { productService } from '../services/productService';
 import { cartService } from '../services/cartService';
 import { Product } from '../types';
@@ -30,6 +30,7 @@ export default function ProductsPage() {
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Update state when URL parameters change
@@ -104,8 +105,65 @@ export default function ProductsPage() {
             </p>
           </div>
 
-          {/* Search and Filter Bar */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-8">
+          <div className="flex gap-6">
+            {/* Category Sidebar */}
+            <div className={`transition-all duration-300 ${showSidebar ? 'w-64' : 'w-0'} flex-shrink-0`}>
+              {showSidebar && (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-24">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-gray-900">Categories</h3>
+                    <button
+                      onClick={() => setShowSidebar(false)}
+                      className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                      title="Hide categories"
+                    >
+                      <ChevronLeft className="w-5 h-5 text-gray-500" />
+                    </button>
+                  </div>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => setSelectedCategory('')}
+                      className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                        selectedCategory === ''
+                          ? 'bg-primary-100 text-primary-700 font-medium'
+                          : 'hover:bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      All Products
+                    </button>
+                    {categories.map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                          selectedCategory === cat
+                            ? 'bg-primary-100 text-primary-700 font-medium'
+                            : 'hover:bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar Toggle Button (when hidden) */}
+            {!showSidebar && (
+              <button
+                onClick={() => setShowSidebar(true)}
+                className="fixed left-4 top-1/2 -translate-y-1/2 z-40 bg-white shadow-lg border border-gray-200 rounded-r-lg p-2 hover:bg-gray-50 transition-colors"
+                title="Show categories"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-600" />
+              </button>
+            )}
+
+            {/* Main Content */}
+            <div className="flex-1 min-w-0">
+              {/* Search and Filter Bar */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-8">
             <div className="flex flex-col md:flex-row gap-4">
               {/* Search */}
               <div className="flex-1 relative">
@@ -264,6 +322,8 @@ export default function ProductsPage() {
               )}
             </div>
           )}
+            </div>
+          </div>
         </div>
       </div>
 
