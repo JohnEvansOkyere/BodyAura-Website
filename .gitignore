@@ -207,3 +207,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project Documentation (keep local only, not in GitHub)
+docs/
+
+# Documentation (local only, not pushed to GitHub)
+# README.md stays in root for GitHub visibility
+docs/
